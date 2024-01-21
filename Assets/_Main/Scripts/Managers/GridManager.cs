@@ -328,7 +328,7 @@ namespace _Main.Scripts.Managers
 
         public Ball GetRandomBallForInitializingGrid()
         {
-            return PoolManager.Instance.GetBasketBall(GetBallIndex());
+            return PoolManager.Instance.GetBall(GetBallIndex());
         }
 
         private int GetBallIndex()

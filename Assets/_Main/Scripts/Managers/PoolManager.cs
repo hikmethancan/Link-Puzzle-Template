@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using _Main.Scripts.Enums;
 using _Main.Scripts.GamePlay.InGame;
 using _Main.Scripts.Pool;
 using _Main.Scripts.Utilities.Singletons;
@@ -10,23 +8,13 @@ namespace _Main.Scripts.Managers
 {
     public class PoolManager : Singleton<PoolManager>
     {
-        [SerializeField] private List<BasketBallPool> basketPools = new List<BasketBallPool>();
+        [SerializeField] private List<BallPool> ballPools = new List<BallPool>();
 
-        public Ball GetBasketBall(int index)
+        public Ball GetBall(int index)
         {
-            var ball = basketPools[index].Get();
+            var ball = ballPools[index].Get();
             ball.gameObject.SetActive(true);
             return ball;
-        }
-        public Ball GetBasketBall(BallType type)
-        {
-            var ball = basketPools.FirstOrDefault(x => x.GetPrefab().ballType == type)?.Get();
-            if (ball != null)
-            {
-                ball.gameObject.SetActive(true);
-                return ball;
-            }
-            return null;
         }
     }
 }

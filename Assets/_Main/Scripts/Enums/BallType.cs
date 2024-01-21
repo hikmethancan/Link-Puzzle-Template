@@ -4,7 +4,6 @@
     {
         Orange,
         Green,
-        Yellow,
         Purple,
         Red,
         Blue,
