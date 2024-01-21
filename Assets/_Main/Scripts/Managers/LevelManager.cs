@@ -1,5 +1,4 @@
 using _Main.Scripts.Utilities.Singletons;
-using ElephantSDK;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -31,14 +30,12 @@ namespace _Main.Scripts.Managers
         {
             Debug.Log("GAME LOSE");
             
-            Elephant.LevelFailed(GetCurrentLevelIndex());
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
         public void LoadNextLevel()
         {
             Debug.Log("GAME WIN");
-            Elephant.LevelCompleted(GetCurrentLevelIndex());
             PlayerPrefs.SetInt("LEVEL", PlayerPrefs.GetInt("LEVEL") + 1);
 
             PlayerPrefs.SetInt("LEVELTEXT", PlayerPrefs.GetInt("LEVELTEXT", 1) + 1);

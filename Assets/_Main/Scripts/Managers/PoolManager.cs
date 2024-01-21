@@ -12,13 +12,13 @@ namespace _Main.Scripts.Managers
     {
         [SerializeField] private List<BasketBallPool> basketPools = new List<BasketBallPool>();
 
-        public BasketBall GetBasketBall(int index)
+        public Ball GetBasketBall(int index)
         {
             var ball = basketPools[index].Get();
             ball.gameObject.SetActive(true);
             return ball;
         }
-        public BasketBall GetBasketBall(BasketBallType type)
+        public Ball GetBasketBall(BallType type)
         {
             var ball = basketPools.FirstOrDefault(x => x.GetPrefab().ballType == type)?.Get();
             if (ball != null)

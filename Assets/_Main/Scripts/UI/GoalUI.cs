@@ -2,6 +2,7 @@ using _Main.Scripts.Enums;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace _Main.Scripts.UI
@@ -9,12 +10,12 @@ namespace _Main.Scripts.UI
     public class GoalUI : MonoBehaviour
     {
         [SerializeField] private TMP_Text countText;
-        [SerializeField] private BasketBallType basketType;
+        [FormerlySerializedAs("basketType")] [SerializeField] private BallType type;
         [SerializeField] private Image icon;
         [SerializeField] private Image frame;
-        public BasketBallType GetBasketType()
+        public BallType GetBasketType()
         {
-            return basketType;
+            return type;
         }
         public void SetCount(float count,bool isAnimate)
         {

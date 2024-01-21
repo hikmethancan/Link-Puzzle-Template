@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,14 +5,13 @@ using System.Threading.Tasks;
 using _Main.Scripts.Enums;
 using _Main.Scripts.GamePlay.GridSystem;
 using _Main.Scripts.Managers;
-using _Main.Scripts.Utilities;
+using _Main.Scripts.Signals;
 using _Main.Scripts.Utilities.Singletons;
 using DG.Tweening;
 using JetBrains.Annotations;
-using TapticPlugin;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
+using GameState = _Main.Scripts.Managers.GameState;
 
 namespace _Main.Scripts.GamePlay.InGame
 {
@@ -25,7 +23,6 @@ namespace _Main.Scripts.GamePlay.InGame
         private LayerMask drawLayer;
 
         [SerializeField] private Image fillImage;
-        [SerializeField] private List<BallShelfController> shelfs = new List<BallShelfController>();
         [SerializeField] private GameObject combotextsParent;
         [SerializeField] private List<GameObject> comboTexts = new List<GameObject>();
 
@@ -78,7 +75,7 @@ namespace _Main.Scripts.GamePlay.InGame
 
             if (Input.GetMouseButtonUp(0))
             {
-                if(_firstDrawedGridTile is null) return;
+                if (_firstDrawedGridTile is null) return;
                 if (!_canClick) return;
                 Debug.Log("hi");
                 if (_matchCoroutine is null)
@@ -88,7 +85,7 @@ namespace _Main.Scripts.GamePlay.InGame
 
         private Coroutine _matchCoroutine;
         private GridTile _lastBombTile;
-        private BasketBall _bombBall;
+        private Ball _bombBall;
 
         private IEnumerator CheckMatchCondition()
         {
@@ -98,6 +95,7 @@ namespace _Main.Scripts.GamePlay.InGame
             {
                 _canClick = false;
             }
+
             if (_drawedTiles.Count >= 3)
             {
                 foreach (var tile in _drawedTiles)
@@ -154,12 +152,12 @@ namespace _Main.Scripts.GamePlay.InGame
         {
             if (!isHaveMatched)
             {
-                GridManager.Instance.ActiveLevelGridData.moveCount--;
-                if (GridManager.Instance.ActiveLevelGridData.moveCount == 0)
+                GridManager.Instance.ActiveLevelData.moveCount--;
+                if (GridManager.Instance.ActiveLevelData.moveCount == 0)
                 {
-                    if (StateManager.Instance.CurrentState != GameState.OnWin &&
-                        StateManager.Instance.CurrentState != GameState.OnLose)
-                        GameManager.OnGameLose?.Invoke();
+                    if (GameManager.Instance.CurrentState != GameState.Win &&
+                        GameManager.Instance.CurrentState != GameState.Lose)
+                        GameEvents.onLose?.Invoke();
                 }
 
                 UIManager.Instance.SetMoveCountText();
@@ -168,54 +166,43 @@ namespace _Main.Scripts.GamePlay.InGame
 
         private void CheckMatchedBasketBallsIsGoal()
         {
+            // TODO Buraya Goal Match Olunca olması gereken aksiyonlar yazilacak.!!!
+
             SetComboTexts(_drawedTiles.Count);
             bool haveMatched = false;
-            var goals = GridManager.Instance.ActiveLevelGridData.goals;
+            var goals = GridManager.Instance.ActiveLevelData.goals;
 
             var selected =
-                goals.FirstOrDefault(x => x.basketBallType == _drawedTiles.FirstOrDefault()!.ActiveBall.ballType)!;
+                goals.FirstOrDefault(x => x.ballType == _drawedTiles.FirstOrDefault()!.ActiveBall.ballType)!;
             if (selected is not null)
             {
                 if (selected.count > 0)
                 {
-                    haveMatched = true;
-                    var rnd = Random.Range(0, 2);
-                    var shelf = shelfs[rnd];
-                    shelf.AddBalls(_drawedTiles.FirstOrDefault()!.ActiveBall.ballType, _drawedTiles.Count, rnd);
                 }
                 else
                 {
-                    if (GridManager.Instance.ActiveLevelGridData.isAllColorInclude)
+                    if (GridManager.Instance.ActiveLevelData.isAllColorInclude)
                     {
                         var allSelected =
-                            goals.FirstOrDefault(x => x.basketBallType == BasketBallType.All)!;
+                            goals.FirstOrDefault(x => x.ballType == BallType.All)!;
                         if (allSelected is not null)
                         {
                             if (allSelected.count > 0)
                             {
-                                haveMatched = true;
-                                var rnd = Random.Range(0, 2);
-                                var shelf = shelfs[rnd];
-                                shelf.AddBalls(_drawedTiles.FirstOrDefault()!.ActiveBall.ballType, _drawedTiles.Count,
-                                    rnd);
                             }
                         }
                     }
                 }
             }
 
-            else if (GridManager.Instance.ActiveLevelGridData.isAllColorInclude)
+            else if (GridManager.Instance.ActiveLevelData.isAllColorInclude)
             {
                 var allSelected =
-                    goals.FirstOrDefault(x => x.basketBallType == BasketBallType.All)!;
+                    goals.FirstOrDefault(x => x.ballType == BallType.All)!;
                 if (allSelected is not null)
                 {
                     if (allSelected.count > 0)
                     {
-                        haveMatched = true;
-                        var rnd = Random.Range(0, 2);
-                        var shelf = shelfs[rnd];
-                        shelf.AddBalls(_drawedTiles.FirstOrDefault()!.ActiveBall.ballType, _drawedTiles.Count, rnd);
                     }
                 }
             }
@@ -247,7 +234,6 @@ namespace _Main.Scripts.GamePlay.InGame
                     if (!CheckAreNeighbours(tile, _lastDrawedGridTile)) return true;
                     tile.ActiveBall.PlaySelectedParticle();
                     _drawedTiles.Add(tile);
-                    VibrationManager.SingleImpact(ImpactFeedback.Light);
                     _lastDrawedGridTile = tile;
                 }
             }
@@ -316,7 +302,6 @@ namespace _Main.Scripts.GamePlay.InGame
                     _lastDrawedGridTile = tile;
                     if (!_drawedTiles.Contains(_firstDrawedGridTile))
                     {
-                        VibrationManager.SingleImpact(ImpactFeedback.Light);
                         _drawedTiles.Add(_firstDrawedGridTile);
                         if (_firstDrawedGridTile.ActiveBall)
                         {
@@ -335,9 +320,7 @@ namespace _Main.Scripts.GamePlay.InGame
             for (int i = 0; i < _drawedTiles.Count; i++)
             {
                 _drawedTiles[i].UpdateLineRendererPosition(_drawedTiles[i].ItemSnapPoint.position);
-                // _drawedTiles[i].ActiveBall?.DisableWithScale();
                 _drawedTiles[i].ActiveBall?.Release(Vector3.zero);
-                // _drawedTiles[i].SetActiveBall(null);
             }
 
             _drawedTiles.Clear();

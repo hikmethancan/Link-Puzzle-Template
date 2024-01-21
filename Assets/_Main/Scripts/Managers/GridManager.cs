@@ -13,15 +13,15 @@ namespace _Main.Scripts.Managers
 {
     public class GridManager : Singleton<GridManager>
     {
-        [SerializeField] private HoopController hoop;
+        // [SerializeField] private HoopController hoop;
         [SerializeField] private ParticleSystem bombParticle;
-        [SerializeField] private BasketBall bombBall;
+        [SerializeField] private Ball bombBall;
         [SerializeField] private GridTile gridPrefab;
         [SerializeField] private GoalController goalController;
-        public LevelGridData ActiveLevelGridData => _activeLevelGridData;
+        public LevelData ActiveLevelData => _activeLevelData;
 
         [Header("Privates")] public GridTile[,] GridTiles;
-        private LevelGridData _activeLevelGridData;
+        private LevelData _activeLevelData;
         private const float GRID_OFFSET_VALUE = 2.5f;
 
 
@@ -31,16 +31,16 @@ namespace _Main.Scripts.Managers
             AttachNeighbours();
         }
 
-        public void SetLevelData(LevelGridData levelGridData)
+        public void SetLevelData(LevelData levelData)
         {
-            _activeLevelGridData = levelGridData;
-            UIManager.Instance.SetMoveCountText();
-            if (levelGridData.isAllColorInclude)
+            _activeLevelData = levelData;
+            // UIManager.Instance.SetMoveCountText();
+            if (levelData.isAllColorInclude)
             {
                 Goal newGoal = new Goal();
-                newGoal.basketBallType = BasketBallType.All;
-                newGoal.count = _activeLevelGridData.allColorCount;
-                _activeLevelGridData.goals.Add(newGoal);
+                newGoal.ballType = BallType.All;
+                newGoal.count = _activeLevelData.allColorCount;
+                _activeLevelData.goals.Add(newGoal);
                 goalController.IsAllColorInclude = true;
             }
             else
@@ -48,12 +48,12 @@ namespace _Main.Scripts.Managers
                 goalController.IsAllColorInclude = false;
             }
 
-            goalController.SetGoals(_activeLevelGridData.goals);
+            goalController.SetGoals(_activeLevelData.goals);
         }
 
-        public void SetGoalUIValues(BasketBallType type, int count)
+        public void SetGoalUIValues(BallType type, int count)
         {
-            if (_activeLevelGridData.isAllColorInclude)
+            if (_activeLevelData.isAllColorInclude)
             {
                 // type = BasketBallType.All;
                 // count = _activeLevelGridData.goals.FirstOrDefault()!.count;
@@ -95,25 +95,25 @@ namespace _Main.Scripts.Managers
                 {
                     List<GridTile> neighbourTiles = new List<GridTile>(4);
 
-                    Vector2Int leftNeighbourIndex = new Vector2Int(x - 1, y);
-                    Vector2Int leftUpNeighbourIndex = new Vector2Int(x - 1, y + 1);
-                    Vector2Int rightNeighbourIndex = new Vector2Int(x + 1, y);
-                    Vector2Int rightUpNeighbourIndex = new Vector2Int(x + 1, y + 1);
-                    Vector2Int upNeighbourIndex = new Vector2Int(x, y + 1);
-                    Vector2Int downNeighbourIndex = new Vector2Int(x, y - 1);
-                    Vector2Int leftDownNeighbourIndex = new Vector2Int(x - 1, y - 1);
-                    Vector2Int rightDownNeighbourIndex = new Vector2Int(x + 1, y - 1);
+                    Vector2Int left = new Vector2Int(x - 1, y);
+                    Vector2Int leftUp = new Vector2Int(x - 1, y + 1);
+                    Vector2Int right = new Vector2Int(x + 1, y);
+                    Vector2Int rightUp = new Vector2Int(x + 1, y + 1);
+                    Vector2Int up = new Vector2Int(x, y + 1);
+                    Vector2Int down = new Vector2Int(x, y - 1);
+                    Vector2Int leftDown = new Vector2Int(x - 1, y - 1);
+                    Vector2Int rightDown = new Vector2Int(x + 1, y - 1);
 
                     Vector2Int[] neighbourIndexes = new Vector2Int[8]
                     {
-                        leftNeighbourIndex,
-                        rightNeighbourIndex,
-                        upNeighbourIndex,
-                        downNeighbourIndex,
-                        leftUpNeighbourIndex,
-                        rightUpNeighbourIndex,
-                        leftDownNeighbourIndex,
-                        rightDownNeighbourIndex
+                        left,
+                        right,
+                        up,
+                        down,
+                        leftUp,
+                        rightUp,
+                        leftDown,
+                        rightDown
                     };
 
                     for (int i = 0; i < neighbourIndexes.Length; i++)
@@ -138,7 +138,7 @@ namespace _Main.Scripts.Managers
             FillAllEmptySpaces();
         }
 
-        public BasketBall SpawnBombBall(GridTile tile)
+        public Ball SpawnBombBall(GridTile tile)
         {
             var bomb = Instantiate(bombBall);
             tile.Initialize(tile.ItemSnapPoint.position, new Vector2Int(tile.Index.x, tile.Index.y), bomb);
@@ -182,7 +182,7 @@ namespace _Main.Scripts.Managers
             {
                 for (int j = startY; j < endY; j++)
                 {
-                    hoop.CheckMatchedBasketBallsIsGoal(GridTiles[i,j].ActiveBall.ballType);
+                    // hoop.CheckMatchedBasketBallsIsGoal(GridTiles[i,j].ActiveBall.ballType);
                     GridTiles[i, j].ActiveBall?.DisableWithScale();
                     GridTiles[i, j].ActiveBall?.Release(Vector3.zero);
                     GridTiles[i, j].SetActiveBall(null);
@@ -326,7 +326,7 @@ namespace _Main.Scripts.Managers
         }
 
 
-        public BasketBall GetRandomBallForInitializingGrid()
+        public Ball GetRandomBallForInitializingGrid()
         {
             return PoolManager.Instance.GetBasketBall(GetBallIndex());
         }
@@ -337,9 +337,9 @@ namespace _Main.Scripts.Managers
             int rndValue = Random.Range(1, 101);
 
             List<int> spawnableIndexes =
-                _activeLevelGridData.colorSpawnDatas
-                    .Where(x => x.chancePercent >= rndValue)
-                    .Select(x => (int)x.basketballType)
+                _activeLevelData.ballSpawnDatas
+                    .Where(x => x.chancePercentage >= rndValue)
+                    .Select(x => (int)x.ballType)
                     .ToList();
 
             index = spawnableIndexes.GetRandomElement();

@@ -1,6 +1,6 @@
 ﻿namespace _Main.Scripts.Enums
 {
-    public enum BasketBallType
+    public enum BallType
     {
         Orange,
         Green,

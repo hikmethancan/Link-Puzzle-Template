@@ -1,5 +1,6 @@
 using _Main.Scripts.Enums;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace _Main.Scripts.GamePlay.InGame
 {
@@ -7,6 +8,6 @@ namespace _Main.Scripts.GamePlay.InGame
     public class Goal
     {
         public int count;
-        public BasketBallType basketBallType;
+        public BallType ballType;
     }
 }

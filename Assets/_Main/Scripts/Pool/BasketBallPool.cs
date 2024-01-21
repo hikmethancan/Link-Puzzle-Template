@@ -3,7 +3,7 @@ using ObjPooler.Scripts;
 
 namespace _Main.Scripts.Pool
 {
-    public class BasketBallPool : GenericObjectPooler<BasketBall>
+    public class BasketBallPool : GenericObjectPooler<Ball>
     {
         
     }

@@ -16,19 +16,19 @@ namespace _Main.Scripts.GamePlay.InGame
         
         public void SetGoals(List<Goal> goals)
         {
-            if (GridManager.Instance.ActiveLevelGridData.isAllColorInclude)
+            if (GridManager.Instance.ActiveLevelData.isAllColorInclude)
             {
                 var initGoal = allIncludeUI;
                 var goal = Instantiate(initGoal, transform);
               
                 goal.gameObject.SetActive(false);
                 goal.gameObject.SetActive(true);
-                goal.SetCount(GridManager.Instance.ActiveLevelGridData.allColorCount,false);
+                goal.SetCount(GridManager.Instance.ActiveLevelData.allColorCount,false);
                 _currentGoals.Add(goal);
             }
             for (int i = 0; i < goals.Count; i++)
             {
-                var initGoal = goalUIs.FirstOrDefault(x => x.GetBasketType() == goals[i].basketBallType);
+                var initGoal = goalUIs.FirstOrDefault(x => x.GetBasketType() == goals[i].ballType);
                 if (initGoal is not null)
                 {
                     var goal = Instantiate(initGoal, transform);
@@ -38,7 +38,7 @@ namespace _Main.Scripts.GamePlay.InGame
             }
         }
 
-        public void SetCount(BasketBallType basketBallType,int count)
+        public void SetCount(BallType ballType,int count)
         {
             // if (GridManager.Instance.ActiveLevelGridData.isAllColorInclude)
             // {
@@ -46,7 +46,7 @@ namespace _Main.Scripts.GamePlay.InGame
             //     if (getAllGoal != null) getAllGoal.SetCount(count);  
             //     return;
             // }
-            var getGoal = _currentGoals.FirstOrDefault(x => x.GetBasketType() == basketBallType);
+            var getGoal = _currentGoals.FirstOrDefault(x => x.GetBasketType() == ballType);
             if (getGoal != null) getGoal.SetCount(count,true);
         }
     }

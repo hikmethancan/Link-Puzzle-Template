@@ -6,7 +6,7 @@ namespace _Main.Scripts.GamePlay.InGame
 {
     public class LevelControl : MonoBehaviour
     {
-        [SerializeField] private LevelGridData levelData;
+        [SerializeField] private LevelData levelData;
 
 
         private void Start()

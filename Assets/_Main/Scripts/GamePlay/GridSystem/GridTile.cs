@@ -12,12 +12,12 @@ namespace _Main.Scripts.GamePlay.GridSystem
         private Transform itemsSnapPoint;
 
         [SerializeField] private LineRenderer drawLine;
-        [Header("Privates")] private BasketBall _activeBall;
+        [Header("Privates")] private Ball _activeBall;
         private Vector2Int _index;
         private List<GridTile> _neighbourTiles;
         private const float BasketBallsMoveDuration = .2f;
         
-        public BasketBall ActiveBall => _activeBall;
+        public Ball ActiveBall => _activeBall;
         public List<GridTile> NeigbourTiles => _neighbourTiles;
         public Transform ItemSnapPoint => itemsSnapPoint;
         public Vector2Int Index => _index;
@@ -27,7 +27,7 @@ namespace _Main.Scripts.GamePlay.GridSystem
         {
             drawLine.SetColor(color);
         }
-        public void Initialize(Vector3 position,Vector2Int index,BasketBall initializeItem,bool isFillingItem = false)
+        public void Initialize(Vector3 position,Vector2Int index,Ball initializeItem,bool isFillingItem = false)
         {
             if(!isFillingItem)
                 transform.localPosition = position;
@@ -38,7 +38,7 @@ namespace _Main.Scripts.GamePlay.GridSystem
             InitializeItem(initializeItem,isFillingItem);
         }
 
-        public void SetActiveBall(BasketBall item)
+        public void SetActiveBall(Ball item)
         {
             _activeBall = item;
         }
@@ -56,7 +56,7 @@ namespace _Main.Scripts.GamePlay.GridSystem
             drawLine.SetPosition(1,pos);
             
         }
-        public void InitializeItem(BasketBall initializeItem,bool shouldMoveWithDotween = false)
+        public void InitializeItem(Ball initializeItem,bool shouldMoveWithDotween = false)
         {
             if(!initializeItem) return;
             _activeBall = initializeItem;
@@ -77,7 +77,7 @@ namespace _Main.Scripts.GamePlay.GridSystem
             _activeBall.Release(ItemSnapPoint.position,ItemSnapPoint);
         }
 
-        public void MoveBallToGrid(BasketBall moveBall,Transform parent)
+        public void MoveBallToGrid(Ball moveBall,Transform parent)
         {
             moveBall.transform.SetParent(parent);
             moveBall.transform.DOLocalMove(Vector3.zero, BasketBallsMoveDuration);

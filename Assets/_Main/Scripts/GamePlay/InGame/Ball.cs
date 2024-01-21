@@ -1,16 +1,14 @@
 ﻿using System.Collections;
 using _Main.Scripts.Enums;
 using _Main.Scripts.GamePlay.GridSystem;
-using _Main.Scripts.Managers;
 using DG.Tweening;
-using TapticPlugin;
 using UnityEngine;
 
 namespace _Main.Scripts.GamePlay.InGame
 {
-    public class BasketBall : MonoBehaviour
+    public class Ball : MonoBehaviour
     {
-        public BasketBallType ballType;
+        public BallType ballType;
         public Vector2Int  GridIndex { get; set; }
         
         [Header("References")] [SerializeField]
@@ -45,7 +43,6 @@ namespace _Main.Scripts.GamePlay.InGame
 
         public void DisableWithScale()
         {
-            VibrationManager.SingleImpact(ImpactFeedback.Light);
             matchedParticle.Play();
             var sq= DOTween.Sequence();
             sq.Append(model.transform.DOScale(Vector3.zero, .4f).SetEase(Ease.InBack)).AppendInterval(.5f)
