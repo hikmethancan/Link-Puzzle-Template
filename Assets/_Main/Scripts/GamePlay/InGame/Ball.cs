@@ -89,11 +89,11 @@ namespace _Main.Scripts.GamePlay.InGame
             selectedParticle.Play();
         }
 
-        private void MoveToGrid(GridTile gridTile)
+        private void MoveToGrid(Tile tile)
         {
-            transform.SetParent(gridTile.transform);
+            transform.SetParent(tile.transform);
             transform.DOLocalMove(Vector3.zero, .5f);
-            gridTile.SetActiveBall(this);
+            tile.SetActiveBall(this);
         }
 
         public void HoldingUpdate(bool isHolding)

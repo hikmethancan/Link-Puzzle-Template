@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace _Main.Scripts.GamePlay.GridSystem
 {
-    public class GridTile : MonoBehaviour
+    public class Tile : MonoBehaviour
     {
         [Header("References")] [SerializeField]
         private Transform itemsSnapPoint;
@@ -14,11 +14,11 @@ namespace _Main.Scripts.GamePlay.GridSystem
         [SerializeField] private LineRenderer drawLine;
         [Header("Privates")] private Ball _activeBall;
         private Vector2Int _index;
-        private List<GridTile> _neighbourTiles;
+        private List<Tile> _neighbourTiles;
         private const float BasketBallsMoveDuration = .2f;
         
         public Ball ActiveBall => _activeBall;
-        public List<GridTile> NeigbourTiles => _neighbourTiles;
+        public List<Tile> NeigbourTiles => _neighbourTiles;
         public Transform ItemSnapPoint => itemsSnapPoint;
         public Vector2Int Index => _index;
 
@@ -43,7 +43,7 @@ namespace _Main.Scripts.GamePlay.GridSystem
             _activeBall = item;
         }
 
-        public void SetNeighbours(List<GridTile> neighbourTiles)
+        public void SetNeighbours(List<Tile> neighbourTiles)
         {
             _neighbourTiles = neighbourTiles;
         }

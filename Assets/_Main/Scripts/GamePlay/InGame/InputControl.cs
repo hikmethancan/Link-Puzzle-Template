@@ -29,16 +29,16 @@ namespace _Main.Scripts.GamePlay.InGame
         private Ray _ray;
         private Camera _camera;
         private RaycastHit _hit;
-        private GridTile _firstDrawedGridTile;
-        private GridTile _lastDrawedGridTile;
-        public List<GridTile> _drawedTiles;
+        private Tile _firstDrawedTile;
+        private Tile _lastDrawedTile;
+        public List<Tile> _drawedTiles;
 
         private bool _canClick;
 
         private void OnEnable()
         {
             _camera = Camera.main;
-            _drawedTiles = new List<GridTile>();
+            _drawedTiles = new List<Tile>();
             fillImage.fillAmount = 0;
             _canClick = true;
             combotextsParent.SetActive(false);
@@ -75,7 +75,7 @@ namespace _Main.Scripts.GamePlay.InGame
 
             if (Input.GetMouseButtonUp(0))
             {
-                if (_firstDrawedGridTile is null) return;
+                if (_firstDrawedTile is null) return;
                 if (!_canClick) return;
                 Debug.Log("hi");
                 if (_matchCoroutine is null)
@@ -84,7 +84,7 @@ namespace _Main.Scripts.GamePlay.InGame
         }
 
         private Coroutine _matchCoroutine;
-        private GridTile _lastBombTile;
+        private Tile _lastBombTile;
         private Ball _bombBall;
 
         private IEnumerator CheckMatchCondition()
@@ -221,20 +221,20 @@ namespace _Main.Scripts.GamePlay.InGame
             _ray = _camera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(_ray, out _hit, 100f, drawLayer))
             {
-                if (_hit.collider.TryGetComponent(out GridTile tile))
+                if (_hit.collider.TryGetComponent(out Tile tile))
                 {
-                    if (!_lastDrawedGridTile && _lastDrawedGridTile == tile) return true;
+                    if (!_lastDrawedTile && _lastDrawedTile == tile) return true;
                     if (_drawedTiles.Contains(tile))
                     {
                         ReverseDrawedTiles(tile);
                         return true;
                     }
 
-                    if (!CheckIsSameBoxType(tile, _lastDrawedGridTile)) return true;
-                    if (!CheckAreNeighbours(tile, _lastDrawedGridTile)) return true;
+                    if (!CheckIsSameBoxType(tile, _lastDrawedTile)) return true;
+                    if (!CheckAreNeighbours(tile, _lastDrawedTile)) return true;
                     tile.ActiveBall.PlaySelectedParticle();
                     _drawedTiles.Add(tile);
-                    _lastDrawedGridTile = tile;
+                    _lastDrawedTile = tile;
                 }
             }
 
@@ -296,17 +296,17 @@ namespace _Main.Scripts.GamePlay.InGame
             _ray = _camera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(_ray, out _hit, 100f, drawLayer))
             {
-                if (_hit.collider.TryGetComponent(out GridTile tile))
+                if (_hit.collider.TryGetComponent(out Tile tile))
                 {
-                    _firstDrawedGridTile = tile;
-                    _lastDrawedGridTile = tile;
-                    if (!_drawedTiles.Contains(_firstDrawedGridTile))
+                    _firstDrawedTile = tile;
+                    _lastDrawedTile = tile;
+                    if (!_drawedTiles.Contains(_firstDrawedTile))
                     {
-                        _drawedTiles.Add(_firstDrawedGridTile);
-                        if (_firstDrawedGridTile.ActiveBall)
+                        _drawedTiles.Add(_firstDrawedTile);
+                        if (_firstDrawedTile.ActiveBall)
                         {
-                            fillImage.color = _firstDrawedGridTile.ActiveBall.GetBallColor();
-                            _firstDrawedGridTile.ItemHoldingUpdate(true);
+                            fillImage.color = _firstDrawedTile.ActiveBall.GetBallColor();
+                            _firstDrawedTile.ItemHoldingUpdate(true);
                         }
                     }
                 }
@@ -315,8 +315,8 @@ namespace _Main.Scripts.GamePlay.InGame
 
         private void DeleteDrawedTiles()
         {
-            _firstDrawedGridTile = null;
-            _lastDrawedGridTile = null;
+            _firstDrawedTile = null;
+            _lastDrawedTile = null;
             for (int i = 0; i < _drawedTiles.Count; i++)
             {
                 _drawedTiles[i].UpdateLineRendererPosition(_drawedTiles[i].ItemSnapPoint.position);
@@ -326,38 +326,38 @@ namespace _Main.Scripts.GamePlay.InGame
             _drawedTiles.Clear();
         }
 
-        private void ReverseDrawedTiles(GridTile gridTile)
+        private void ReverseDrawedTiles(Tile tile)
         {
-            int heldTileIndex = _drawedTiles.IndexOf(gridTile);
+            int heldTileIndex = _drawedTiles.IndexOf(tile);
             int drawedTileCount = _drawedTiles.Count;
             int removeCount = (drawedTileCount - 1) - heldTileIndex;
             for (int i = 0; i < removeCount; i++)
             {
                 if (_drawedTiles.Count <= 0)
                     break;
-                GridTile tile = _drawedTiles[^1];
+                tile = _drawedTiles[^1];
                 tile.ActiveBall.Release(Vector3.zero);
                 tile.UpdateLineRendererPosition(tile.ItemSnapPoint.position);
                 _drawedTiles.Remove(tile);
             }
 
-            _lastDrawedGridTile = _drawedTiles[heldTileIndex];
+            _lastDrawedTile = _drawedTiles[heldTileIndex];
             var drawPos = _drawedTiles[^1].ItemSnapPoint.position;
             var pos = new Vector3(drawPos.x, 0f, drawPos.z);
             _drawedTiles[^1].UpdateLineRendererPosition(pos);
         }
 
-        private void UpdateLastDrawedTile(GridTile gridTile, bool isWithVisualUpdate = true)
+        private void UpdateLastDrawedTile(Tile tile, bool isWithVisualUpdate = true)
         {
-            _lastDrawedGridTile = gridTile;
+            _lastDrawedTile = tile;
 
             if (isWithVisualUpdate)
             {
-                _lastDrawedGridTile.ItemHoldingUpdate(true);
+                _lastDrawedTile.ItemHoldingUpdate(true);
             }
         }
 
-        private bool CheckIsSameBoxType([CanBeNull] GridTile tile1, [CanBeNull] GridTile tile2)
+        private bool CheckIsSameBoxType([CanBeNull] Tile tile1, [CanBeNull] Tile tile2)
         {
             if (tile1 is null || tile2 is null) return false;
             if (tile1.ActiveBall == null || tile2.ActiveBall == null)
@@ -365,9 +365,9 @@ namespace _Main.Scripts.GamePlay.InGame
             return tile1.ActiveBall?.ballType == tile2.ActiveBall?.ballType;
         }
 
-        private bool CheckAreNeighbours(GridTile gridTile, GridTile neighbourCheckTile)
+        private bool CheckAreNeighbours(Tile tile, Tile neighbourCheckTile)
         {
-            return gridTile.NeigbourTiles.Contains(neighbourCheckTile);
+            return tile.NeigbourTiles.Contains(neighbourCheckTile);
         }
 
         private void UpdateLineRenderers()

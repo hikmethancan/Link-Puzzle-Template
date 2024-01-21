@@ -7,6 +7,7 @@ using _Main.Scripts.GamePlay.InGame;
 using _Main.Scripts.Utilities;
 using _Main.Scripts.Utilities.Singletons;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 namespace _Main.Scripts.Managers
@@ -16,11 +17,11 @@ namespace _Main.Scripts.Managers
         // [SerializeField] private HoopController hoop;
         [SerializeField] private ParticleSystem bombParticle;
         [SerializeField] private Ball bombBall;
-        [SerializeField] private GridTile gridPrefab;
+        [SerializeField] private Tile prefab;
         [SerializeField] private GoalController goalController;
         public LevelData ActiveLevelData => _activeLevelData;
 
-        [Header("Privates")] public GridTile[,] GridTiles;
+        [Header("Privates")] public Tile[,] GridTiles;
         private LevelData _activeLevelData;
         private const float GRID_OFFSET_VALUE = 2.5f;
 
@@ -64,7 +65,7 @@ namespace _Main.Scripts.Managers
 
         private void SpawnGrid()
         {
-            GridTiles = new GridTile[6, 6];
+            GridTiles = new Tile[6, 6];
 
             float gridHalfSize = 3f * 0.5f;
             float columnSpawnOffsetX = ((3f * -6) * 0.5f) + gridHalfSize;
@@ -75,11 +76,11 @@ namespace _Main.Scripts.Managers
 
                 for (int y = 0; y < 6; y++)
                 {
-                    GridTile gridTile = Instantiate(gridPrefab, transform);
-                    gridTile.gameObject.name += $"{x}_{y}";
+                    Tile tile = Instantiate(prefab, transform);
+                    tile.gameObject.name += $"{x}_{y}";
                     Vector3 spawnPoint = new Vector3(columnSpawnOffsetX, 0f, columnSpawnOffsetZ);
-                    gridTile.Initialize(spawnPoint, new Vector2Int(x, y), GetRandomBallForInitializingGrid());
-                    GridTiles[x, y] = gridTile;
+                    tile.Initialize(spawnPoint, new Vector2Int(x, y), GetRandomBallForInitializingGrid());
+                    GridTiles[x, y] = tile;
                     columnSpawnOffsetZ += GRID_OFFSET_VALUE;
                 }
 
@@ -93,7 +94,7 @@ namespace _Main.Scripts.Managers
             {
                 for (int y = 0; y < 6; y++)
                 {
-                    List<GridTile> neighbourTiles = new List<GridTile>(4);
+                    List<Tile> neighbourTiles = new List<Tile>(4);
 
                     Vector2Int left = new Vector2Int(x - 1, y);
                     Vector2Int leftUp = new Vector2Int(x - 1, y + 1);
@@ -138,7 +139,7 @@ namespace _Main.Scripts.Managers
             FillAllEmptySpaces();
         }
 
-        public Ball SpawnBombBall(GridTile tile)
+        public Ball SpawnBombBall(Tile tile)
         {
             var bomb = Instantiate(bombBall);
             tile.Initialize(tile.ItemSnapPoint.position, new Vector2Int(tile.Index.x, tile.Index.y), bomb);
@@ -177,7 +178,7 @@ namespace _Main.Scripts.Managers
                 endY = 6;
             }
 
-            
+
             for (int i = startX; i < endX; i++)
             {
                 for (int j = startY; j < endY; j++)
@@ -234,7 +235,6 @@ namespace _Main.Scripts.Managers
                 }
             }
         }
-
 
 
         private void MoveAllTilesToEmptySpaces()
