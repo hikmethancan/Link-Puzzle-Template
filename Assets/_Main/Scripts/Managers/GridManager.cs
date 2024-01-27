@@ -7,14 +7,13 @@ using _Main.Scripts.GamePlay.InGame;
 using _Main.Scripts.Utilities;
 using _Main.Scripts.Utilities.Singletons;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 namespace _Main.Scripts.Managers
 {
     public class GridManager : Singleton<GridManager>
     {
-        // [SerializeField] private HoopController hoop;
+        [SerializeField] private GridData gridSO;
         [SerializeField] private ParticleSystem bombParticle;
         [SerializeField] private Ball bombBall;
         [SerializeField] private Tile prefab;
@@ -35,7 +34,6 @@ namespace _Main.Scripts.Managers
         public void SetLevelData(LevelData levelData)
         {
             _activeLevelData = levelData;
-            // UIManager.Instance.SetMoveCountText();
             if (levelData.isAllColorInclude)
             {
                 Goal newGoal = new Goal();
@@ -65,16 +63,16 @@ namespace _Main.Scripts.Managers
 
         private void SpawnGrid()
         {
-            GridTiles = new Tile[6, 6];
+            GridTiles = new Tile[gridSO.row, gridSO.column];
 
             float gridHalfSize = 3f * 0.5f;
-            float columnSpawnOffsetX = ((3f * -6) * 0.5f) + gridHalfSize;
+            float columnSpawnOffsetX = ((3f * -gridSO.row) * 0.5f) + gridHalfSize;
 
-            for (int x = 0; x < 6; x++)
+            for (int x = 0; x < gridSO.row; x++)
             {
-                float columnSpawnOffsetZ = ((3f * -6f) * 0.5f) + gridHalfSize;
+                float columnSpawnOffsetZ = ((3f * -gridSO.column) * 0.5f) + gridHalfSize;
 
-                for (int y = 0; y < 6; y++)
+                for (int y = 0; y < gridSO.column; y++)
                 {
                     Tile tile = Instantiate(prefab, transform);
                     tile.gameObject.name += $"{x}_{y}";
@@ -90,9 +88,9 @@ namespace _Main.Scripts.Managers
 
         private void AttachNeighbours()
         {
-            for (int x = 0; x < 6; x++)
+            for (int x = 0; x < gridSO.row; x++)
             {
-                for (int y = 0; y < 6; y++)
+                for (int y = 0; y < gridSO.column; y++)
                 {
                     List<Tile> neighbourTiles = new List<Tile>(4);
 
@@ -116,15 +114,10 @@ namespace _Main.Scripts.Managers
                         leftDown,
                         rightDown
                     };
-
-                    for (int i = 0; i < neighbourIndexes.Length; i++)
-                    {
-                        if ((neighbourIndexes[i].x >= 0f && neighbourIndexes[i].x < 6)
-                            && (neighbourIndexes[i].y >= 0f && neighbourIndexes[i].y < 6))
-                        {
-                            neighbourTiles.Add(GridTiles[neighbourIndexes[i].x, neighbourIndexes[i].y]);
-                        }
-                    }
+                    // Checking neighbours should in the grid borders
+                    neighbourTiles.AddRange(from t in neighbourIndexes
+                        where (t.x >= 0f && t.x < gridSO.row) && (t.y >= 0f && t.y < gridSO.column)
+                        select GridTiles[t.x, t.y]);
 
                     GridTiles[x, y].SetNeighbours(neighbourTiles);
                 }

@@ -43,18 +43,6 @@ namespace _Main.Scripts.GamePlay.InGame
                 .AppendCallback(() => gameObject.SetActive(false));
         }
 
-        public void ShelfSetup()
-        {
-            moveTrail.SetActive(false);
-            ballCircle.SetActive(false);
-        }
-
-        public void PlayerSetup()
-        {
-            moveTrail.SetActive(true);
-            ballCircle.SetActive(false);
-        }
-
         public void MoveToTarget(Transform target)
         {
         }
