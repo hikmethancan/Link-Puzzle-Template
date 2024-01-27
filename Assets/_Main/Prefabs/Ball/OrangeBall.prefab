@@ -8,6 +8,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1544698486792072620, guid: 6dcdfaaefa8a68e43bc44b393c57af6e,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 0320e9e35a5f4ea4c8a2f4a6f87ed8fa, type: 2}
     - target: {fileID: 2272819428274856036, guid: 6dcdfaaefa8a68e43bc44b393c57af6e,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -61,7 +66,7 @@ PrefabInstance:
     - target: {fileID: 8081458113502102330, guid: 6dcdfaaefa8a68e43bc44b393c57af6e,
         type: 3}
       propertyPath: m_Name
-      value: BallBase
+      value: OrangeBall
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

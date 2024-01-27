@@ -62,15 +62,12 @@ namespace _Main.Scripts.GamePlay.GridSystem
             _activeBall = initializeItem;
             Transform transform1;
             initializeItem.GridIndex = _index;
-            var transformPosition = transform.position;
-            transformPosition.y = 0;
-            transform.position = transformPosition;
 
             (transform1 = _activeBall.transform).SetParent(transform);
             if (shouldMoveWithDotween)
-                transform1.DOLocalMove(Vector3.zero, BasketBallsMoveDuration);
+                transform1.DOLocalMove(ItemSnapPoint.localPosition, BasketBallsMoveDuration);
             else
-                transform1.localPosition = Vector3.zero;
+                transform1.localPosition = itemsSnapPoint.localPosition;
             SetDrawLineColor(initializeItem.GetBallColor());
             if(!_activeBall)
                 return;

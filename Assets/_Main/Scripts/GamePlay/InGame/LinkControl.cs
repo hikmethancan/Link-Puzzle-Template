@@ -52,7 +52,7 @@ namespace _Main.Scripts.GamePlay.InGame
 
         private void Drawing()
         {
-            if (!_canClick) return;
+           
             if (Input.GetMouseButtonDown(0))
             {
                 FirstClickToTile();
@@ -265,8 +265,12 @@ namespace _Main.Scripts.GamePlay.InGame
             _ray = _camera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(_ray, out _hit, 100f, drawLayer))
             {
+                Debug.Log("Ray");
+                Debug.Log(_hit.transform.gameObject.name);
+                    
                 if (_hit.collider.TryGetComponent(out Tile tile))
                 {
+                    Debug.Log("Tile");
                     _firstLinkedTile = tile;
                     _lastLinkedTile = tile;
                     if (!_linkedTiles.Contains(_firstLinkedTile))

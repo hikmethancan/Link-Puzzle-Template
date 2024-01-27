@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using _Main.Scripts.Datas;
@@ -17,14 +18,12 @@ namespace _Main.Scripts.Managers
         [SerializeField] private ParticleSystem bombParticle;
         [SerializeField] private Ball bombBall;
         [SerializeField] private Tile prefab;
-        [SerializeField] private GoalController goalController;
         public LevelData ActiveLevelData => _activeLevelData;
 
         [Header("Privates")] public Tile[,] GridTiles;
         private LevelData _activeLevelData;
         private const float GRID_OFFSET_VALUE = 2.5f;
-
-
+        
         public void Setup()
         {
             SpawnGrid();
@@ -34,31 +33,31 @@ namespace _Main.Scripts.Managers
         public void SetLevelData(LevelData levelData)
         {
             _activeLevelData = levelData;
-            if (levelData.isAllColorInclude)
-            {
-                Goal newGoal = new Goal();
-                newGoal.ballType = BallType.All;
-                newGoal.count = _activeLevelData.allColorCount;
-                _activeLevelData.goals.Add(newGoal);
-                goalController.IsAllColorInclude = true;
-            }
-            else
-            {
-                goalController.IsAllColorInclude = false;
-            }
-
-            goalController.SetGoals(_activeLevelData.goals);
+            // if (levelData.isAllColorInclude)
+            // {
+            //     Goal newGoal = new Goal();
+            //     newGoal.ballType = BallType.All;
+            //     newGoal.count = _activeLevelData.allColorCount;
+            //     _activeLevelData.goals.Add(newGoal);
+            //     goalController.IsAllColorInclude = true;
+            // }
+            // else
+            // {
+            //     goalController.IsAllColorInclude = false;
+            // }
+            //
+            // goalController.SetGoals(_activeLevelData.goals);
         }
 
         public void SetGoalUIValues(BallType type, int count)
         {
-            if (_activeLevelData.isAllColorInclude)
-            {
-                // type = BasketBallType.All;
-                // count = _activeLevelGridData.goals.FirstOrDefault()!.count;
-            }
-
-            goalController.SetCount(type, count);
+            // if (_activeLevelData.isAllColorInclude)
+            // {
+            //     // type = BasketBallType.All;
+            //     // count = _activeLevelGridData.goals.FirstOrDefault()!.count;
+            // }
+            //
+            // goalController.SetCount(type, count);
         }
 
         private void SpawnGrid()
@@ -192,16 +191,16 @@ namespace _Main.Scripts.Managers
             {
                 anyEmptySpace = false;
 
-                for (int x = 5; x >= 0; x--)
+                for (int x = gridSO.row-1; x >= 0; x--)
                 {
-                    for (int y = 5; y >= 0; y--)
+                    for (int y = gridSO.column-1; y >= 0; y--)
                     {
-                        if (y == 5)
+                        if (y == gridSO.column-1)
                         {
                             if (!GridTiles[x, y].ActiveBall)
                             {
                                 var spawnedBall = GetRandomBallForInitializingGrid();
-                                GridTiles[x, y].Initialize(GridTiles[x, y].transform.localPosition,
+                                GridTiles[x, y].Initialize(GridTiles[x, y].ItemSnapPoint.position,
                                     new Vector2Int(x, y),
                                     spawnedBall, true);
                                 MoveBallToEmptySpaceBelow(x, y);
@@ -232,15 +231,15 @@ namespace _Main.Scripts.Managers
 
         private void MoveAllTilesToEmptySpaces()
         {
-            for (int x = 5; x >= 0; x--)
+            for (int x = gridSO.row-1; x >= 0; x--)
             {
-                for (int y = 5; y >= 0; y--)
+                for (int y = gridSO.column-1; y >= 0; y--)
                 {
-                    if (y == 5)
+                    if (y == gridSO.column-1)
                     {
                         if (!GridTiles[x, y].ActiveBall)
                         {
-                            GridTiles[x, y].Initialize(GridTiles[x, y].transform.localPosition, new Vector2Int(x, y),
+                            GridTiles[x, y].Initialize(GridTiles[x, y].ItemSnapPoint.position, new Vector2Int(x, y),
                                 GetRandomBallForInitializingGrid());
 
                             // Move the ball to the empty space below
@@ -311,7 +310,7 @@ namespace _Main.Scripts.Managers
                     {
                         // If there's no space above, spawn a new ball at the top row
                         var newBall = GetRandomBallForInitializingGrid();
-                        GridTiles[x, 0].Initialize(GridTiles[x, 0].transform.localPosition,
+                        GridTiles[x, 0].Initialize(GridTiles[x, 0].ItemSnapPoint.position,
                             new Vector2Int(x, 0), newBall, true);
                     }
                 }
@@ -319,7 +318,7 @@ namespace _Main.Scripts.Managers
         }
 
 
-        public Ball GetRandomBallForInitializingGrid()
+        private Ball GetRandomBallForInitializingGrid()
         {
             return PoolManager.Instance.GetBall(GetBallIndex());
         }
