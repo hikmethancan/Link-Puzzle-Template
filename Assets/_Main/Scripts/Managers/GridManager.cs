@@ -7,7 +7,9 @@ using _Main.Scripts.GamePlay.BallSystem;
 using _Main.Scripts.GamePlay.GridSystem;
 using _Main.Scripts.GamePlay.InGame;
 using _Main.Scripts.Utilities;
+using _Main.Scripts.Utilities.Extensions;
 using _Main.Scripts.Utilities.Singletons;
+using Cinemachine;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -15,6 +17,7 @@ namespace _Main.Scripts.Managers
 {
     public class GridManager : Singleton<GridManager>
     {
+        [SerializeField] private CinemachineTargetGroup targetCamera;
         [SerializeField] private GridData gridSO;
         [SerializeField] private ParticleSystem bombParticle;
         [SerializeField] private Ball bombBall;
@@ -64,7 +67,7 @@ namespace _Main.Scripts.Managers
         private void SpawnGrid()
         {
             GridTiles = new Tile[gridSO.row, gridSO.column];
-
+            List<Transform> balls = new List<Transform>();
             float gridHalfSize = 3f * 0.5f;
             float columnSpawnOffsetX = ((3f * -gridSO.row) * 0.5f) + gridHalfSize;
 
@@ -77,12 +80,30 @@ namespace _Main.Scripts.Managers
                     Tile tile = Instantiate(prefab, transform);
                     tile.gameObject.name += $"{x}_{y}";
                     Vector3 spawnPoint = new Vector3(columnSpawnOffsetX, 0f, columnSpawnOffsetZ);
-                    tile.Initialize(spawnPoint, new Vector2Int(x, y), GetRandomBallForInitializingGrid());
+                    var ball = GetRandomBallForInitializingGrid();
+                    balls.Add(ball.transform);
+                    tile.Initialize(spawnPoint, new Vector2Int(x, y), ball);
                     GridTiles[x, y] = tile;
                     columnSpawnOffsetZ += GRID_OFFSET_VALUE;
                 }
-
                 columnSpawnOffsetX += GRID_OFFSET_VALUE;
+            }
+
+            List<CinemachineTargetGroup.Target> cineTargets = new List<CinemachineTargetGroup.Target>();
+            foreach (var b in balls)
+            {
+                CinemachineTargetGroup.Target tempTarget = new CinemachineTargetGroup.Target();
+                tempTarget.target = b;
+                cineTargets.Add(tempTarget);
+            }
+
+            targetCamera.m_Targets = new CinemachineTargetGroup.Target[cineTargets.Count];
+            for (var i = 0; i < cineTargets.Count; i++)
+            {
+                var cineTarget = cineTargets[i];
+                cineTarget.radius = 5;
+                cineTarget.weight= 5;
+                targetCamera.m_Targets[i] = cineTarget;
             }
         }
 
