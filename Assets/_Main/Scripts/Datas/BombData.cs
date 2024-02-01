@@ -7,5 +7,6 @@ namespace _Main.Scripts.Datas
     {
         public int explosionX;
         public int explosionY;
+        public float explosionWaitDuration;
     }
 }

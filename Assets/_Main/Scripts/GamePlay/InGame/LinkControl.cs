@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using _Main.Scripts.Enums;
+using _Main.Scripts.GamePlay.BallSystem;
 using _Main.Scripts.GamePlay.GridSystem;
 using _Main.Scripts.Managers;
 using _Main.Scripts.Signals;
@@ -17,19 +18,28 @@ namespace _Main.Scripts.GamePlay.InGame
 {
     public class LinkControl : Singleton<LinkControl>
     {
-        [InfoBox("Link Value For Booster Bomber",EInfoBoxType.Warning)] [SerializeField] private int matchedBasketsBombValue;
+        [InfoBox("Link Value For Booster Bomber", EInfoBoxType.Warning)] [SerializeField]
+        private int matchedBasketsBombValue;
 
         [Space] [Space] [Space] [SerializeField]
         private LayerMask drawLayer;
-        
+
+
+        #region Privates
+
         private Ray _ray;
         private Camera _camera;
         private RaycastHit _hit;
         private Tile _firstLinkedTile;
         private Tile _lastLinkedTile;
         [ReadOnly] private List<Tile> _linkedTiles;
-
         private bool _canClick;
+        private Coroutine _matchCoroutine;
+        private Tile _lastBombTile;
+        private Ball _bombBall;
+
+        #endregion
+
 
         private void OnEnable()
         {
@@ -52,7 +62,6 @@ namespace _Main.Scripts.GamePlay.InGame
 
         private void Drawing()
         {
-           
             if (Input.GetMouseButtonDown(0))
             {
                 FirstClickToTile();
@@ -62,7 +71,7 @@ namespace _Main.Scripts.GamePlay.InGame
             {
                 if (UpdateDrawableTiles()) return;
                 UpdateLineRenderers();
-                UpdateDrawedGridsBall();
+                UpdateLinkedGridsBall();
             }
 
             if (Input.GetMouseButtonUp(0))
@@ -75,9 +84,6 @@ namespace _Main.Scripts.GamePlay.InGame
             }
         }
 
-        private Coroutine _matchCoroutine;
-        private Tile _lastBombTile;
-        private Ball _bombBall;
 
         private IEnumerator CheckMatchCondition()
         {
@@ -109,12 +115,11 @@ namespace _Main.Scripts.GamePlay.InGame
                 {
                     _lastBombTile = _linkedTiles.Last();
                     _bombBall = GridManager.Instance.SpawnBombBall(_lastBombTile);
-                    var tempScale = _bombBall.transform.localScale * 1.5f;
-                    _bombBall.transform.DOScale(tempScale, .4f).SetLoops(3, LoopType.Yoyo).OnComplete(() => { });
+
                     _linkedTiles.Remove(_lastBombTile);
                 }
 
-                DeleteDrawedTiles();
+                DeleteLinkedTiles();
                 yield return new WaitForSeconds(0.4f);
                 GridManager.Instance.SpawnNewBallsAfterTheDeleting();
             }
@@ -134,7 +139,7 @@ namespace _Main.Scripts.GamePlay.InGame
             }
 
             _canClick = true;
-            DeleteDrawedTiles();
+            DeleteLinkedTiles();
             _matchCoroutine = null;
 
             _matchCoroutine = null;
@@ -218,13 +223,13 @@ namespace _Main.Scripts.GamePlay.InGame
                     if (!_lastLinkedTile && _lastLinkedTile == tile) return true;
                     if (_linkedTiles.Contains(tile))
                     {
-                        ReverseDrawedTiles(tile);
+                        ReverseLinkedTiles(tile);
                         return true;
                     }
 
                     if (!CheckIsSameBoxType(tile, _lastLinkedTile)) return true;
                     if (!CheckAreNeighbours(tile, _lastLinkedTile)) return true;
-                    tile.ActiveBall.PlaySelectedParticle();
+                    tile.ItemSelected();
                     _linkedTiles.Add(tile);
                     _lastLinkedTile = tile;
                 }
@@ -248,44 +253,34 @@ namespace _Main.Scripts.GamePlay.InGame
             await DelayAsync(1000);
             comboText.transform.DOScale(Vector3.zero, .5f).OnComplete(() => comboText.gameObject.SetActive(false));
         }
-        
 
-        private void UpdateDrawedGridsBall()
+
+        private void UpdateLinkedGridsBall()
         {
-            int drawedCount = _linkedTiles.Count;
-            if (drawedCount == 0) return;
-            for (int i = 0; i < drawedCount; i++)
+            int linkedTilesCount = _linkedTiles.Count;
+            if (linkedTilesCount == 0) return;
+            for (int i = 0; i < linkedTilesCount; i++)
             {
-                _linkedTiles[i].ItemHoldingUpdate(true);
+                _linkedTiles[i].ItemSelected();
             }
         }
 
         private void FirstClickToTile()
         {
             _ray = _camera.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(_ray, out _hit, 100f, drawLayer))
+            if (!Physics.Raycast(_ray, out _hit, 100f, drawLayer)) return;
+            if (!_hit.collider.TryGetComponent(out Tile tile)) return;
+            _firstLinkedTile = tile;
+            _lastLinkedTile = tile;
+            if (_linkedTiles.Contains(_firstLinkedTile)) return;
+            _linkedTiles.Add(_firstLinkedTile);
+            if (_firstLinkedTile.ActiveBall)
             {
-                Debug.Log("Ray");
-                Debug.Log(_hit.transform.gameObject.name);
-                    
-                if (_hit.collider.TryGetComponent(out Tile tile))
-                {
-                    Debug.Log("Tile");
-                    _firstLinkedTile = tile;
-                    _lastLinkedTile = tile;
-                    if (!_linkedTiles.Contains(_firstLinkedTile))
-                    {
-                        _linkedTiles.Add(_firstLinkedTile);
-                        if (_firstLinkedTile.ActiveBall)
-                        {
-                            _firstLinkedTile.ItemHoldingUpdate(true);
-                        }
-                    }
-                }
+                _firstLinkedTile.ItemSelected();
             }
         }
 
-        private void DeleteDrawedTiles()
+        private void DeleteLinkedTiles()
         {
             _firstLinkedTile = null;
             _lastLinkedTile = null;
@@ -298,11 +293,11 @@ namespace _Main.Scripts.GamePlay.InGame
             _linkedTiles.Clear();
         }
 
-        private void ReverseDrawedTiles(Tile tile)
+        private void ReverseLinkedTiles(Tile tile)
         {
             int heldTileIndex = _linkedTiles.IndexOf(tile);
-            int drawedTileCount = _linkedTiles.Count;
-            int removeCount = (drawedTileCount - 1) - heldTileIndex;
+            int linkedTilesCount = _linkedTiles.Count;
+            int removeCount = (linkedTilesCount - 1) - heldTileIndex;
             for (int i = 0; i < removeCount; i++)
             {
                 if (_linkedTiles.Count <= 0)
@@ -319,7 +314,7 @@ namespace _Main.Scripts.GamePlay.InGame
             _linkedTiles[^1].UpdateLineRendererPosition(pos);
         }
 
-        private void UpdateLastDrawedTile(Tile tile, bool isWithVisualUpdate = true)
+        private void UpdateLastLinkedTile(Tile tile, bool isWithVisualUpdate = true)
         {
             _lastLinkedTile = tile;
 
@@ -344,11 +339,11 @@ namespace _Main.Scripts.GamePlay.InGame
 
         private void UpdateLineRenderers()
         {
-            int drawedCount = _linkedTiles.Count;
-            if (drawedCount == 0) return;
-            for (int i = 0; i < drawedCount; i++)
+            int linkedTilesCount = _linkedTiles.Count;
+            if (linkedTilesCount == 0) return;
+            for (int i = 0; i < linkedTilesCount; i++)
             {
-                if (i != drawedCount - 1)
+                if (i != linkedTilesCount - 1)
                 {
                     var drawPos = _linkedTiles[i + 1].ItemSnapPoint.position;
                     var pos = new Vector3(drawPos.x, 0f, drawPos.z);

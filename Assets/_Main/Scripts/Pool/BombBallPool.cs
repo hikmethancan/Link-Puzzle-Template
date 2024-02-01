@@ -4,8 +4,7 @@ using ObjPooler.Scripts;
 
 namespace _Main.Scripts.Pool
 {
-    public class BallPool : GenericObjectPooler<Ball>
+    public class BombBallPool : GenericObjectPooler<BomberBall>
     {
-        
     }
 }

@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using _Main.Scripts.GamePlay.BallSystem;
 using _Main.Scripts.GamePlay.InGame;
 using _Main.Scripts.Utilities.Extensions;
 using DG.Tweening;
@@ -22,6 +24,11 @@ namespace _Main.Scripts.GamePlay.GridSystem
         public Transform ItemSnapPoint => itemsSnapPoint;
         public Vector2Int Index => _index;
 
+
+        private void OnEnable()
+        {
+            UpdateLineRendererPosition(Vector3.zero);
+        }
 
         public void SetDrawLineColor(Color color)
         {
@@ -47,7 +54,7 @@ namespace _Main.Scripts.GamePlay.GridSystem
         {
             _neighbourTiles = neighbourTiles;
         }
-
+        
         public void UpdateLineRendererPosition(Vector3 pos)
         {
             var position = itemsSnapPoint.position;
@@ -88,6 +95,14 @@ namespace _Main.Scripts.GamePlay.GridSystem
             _activeBall.HoldingUpdate(isHolding);
         }
 
+        public void ItemSelected()
+        {
+            if(!_activeBall) return;
+            _activeBall.Selected();
+        }
+        
+
+        // This method => Move to Item target objects position.
         public void SendItemToTarget(Transform target)
         {
             if(!_activeBall) return;
